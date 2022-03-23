@@ -1,6 +1,6 @@
 # app.py
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restx import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
@@ -41,7 +41,7 @@ class MovieSchema(Schema):
     description = fields.Str()
     trailer = fields.Str()
     year = fields.Int()
-    rating = fields.Int()
+    rating = fields.Float()
     genre_id = fields.Int()
     director_id = fields.Int()
 
@@ -83,6 +83,8 @@ class MoviesView(Resource):
             movies = Movie.query.all()
         if movies:
             return movies_schema.dump(movies), 200
+        else:
+            return "", 404
 
 @movie_ns.route('/<int:mid>')
 class MoviesView(Resource):
@@ -107,6 +109,8 @@ class DirectorsView(Resource):
 class DirectorView(Resource):
     def put(self, did: int):
         director = Director.query.get(did)
+        if not director:
+            return "", 404
         req_json = request.json
         director.name = req_json.get("name")
         db.session.add(director)
@@ -132,6 +136,8 @@ class GenresView(Resource):
 class GenreView(Resource):
     def put(self, gid: int):
         genre = Genre.query.get(gid)
+        if not genre:
+            return "", 404
         req_json = request.json
         genre.name = req_json.get("name")
         db.session.add(genre)
